@@ -1,43 +1,16 @@
 #!/usr/bin/python
 """
-log Server.
 
-Accepts connections and will tail and grep log. If any matching lines are found, they
-are sent out to all connected clients
+Loggie Server
+
+@author  Jason Kruse (jasonkruse.com)
+@date    2013-05-21
+@version 0.1
+
+Server daemon for Loggie.  Will tail a log file, run a grep and send any matching
+lines to connected clients.
 """
-import select 
-import socket 
-import sys 
-import signal
-import time
-import subprocess
-import re
-
-# Change me!
-logFile = '/var/log/syslog'
-regex   = 'PHP Fatal error|PHP Parse error|PHP Warning|Error processing|assert|alrt|warn|eror'
-remove  = '^.*FREAK-DAT-TONE'
-port    = 5005 
-
-# Probably want to leave these alone
-host    = '0.0.0.0'
-backlog = 5 
-size    = 1024 
-timeout = .250
-
-def shutdown():
-    print "Shutting down socket"
-    server.close()
-    sys.exit(0)
-
-def log(msg):
-    print msg
-
-def sigHandler(signum, frame):
-    print "Signal %d caught" % signum
-    shutdown()
-
-signal.signal(signal.SIGINT,sigHandler)
+from loggie import *
 
 print "Opening log file"
 try:
@@ -50,22 +23,22 @@ except Exception as e:
 
 print "Starting server on port %d" % port
 try:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-    server.bind((host,port)) 
-    server.listen(backlog) 
+    #loggieSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+    loggieSocket.bind(('0.0.0.0',port)) 
+    loggieSocket.listen(backlog) 
 except Exception as e:
     log("Error opening socket")
     sys.exit(1)
 
-input = [server] 
+input = [loggieSocket] 
 running = 1
 while running:
-    # handle new sockets or commands
+    # multiplexed I/O!
     inputready,outputready,exceptready = select.select(input,[],[], timeout)
     for s in inputready: 
-        if s == server: 
-            # handle the server socket 
-            client, address = server.accept() 
+        if s == loggieSocket: 
+            # handle new clients
+            client, address = loggieSocket.accept() 
             print "Accepting connection", address
             input.append(client) 
         else: 
@@ -76,25 +49,23 @@ while running:
                 if data == "quit":
                     print "Received quit from client ", s.getpeername()
                     running = 0
-                #add setRegex command here
-                #s.send(data) 
+                #TODO set the regex from a command
             else: 
                 s.close() 
                 input.remove(s) 
     
-    # chedk for logs
+    # chedk for logs do this 10x (arbitrary number) for evertime we check for a new client
     for x in range(0,10):
         if logPoller.poll(timeout):
             logMsg = logStream.stdout.readline();
             if re.search(regex, logMsg):
                 logMsg = re.sub(remove, "", logMsg)
                 for s in input:
-                    if s != server: 
+                    if s != loggieSocket: 
                         if s.send(logMsg) == 0:
                             print "Socket ", s.getpeername() , " died :("
                             input.remove(s)
                 print "log: ", logMsg.rstrip()
-                #print "log:", logStream.stdout.readline()
     
 shutdown()
 
