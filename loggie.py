@@ -16,6 +16,7 @@ import signal
 import time
 import subprocess
 import re
+import os
 
 def shutdown():
     print "Shutting down socket"
