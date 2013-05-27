@@ -17,6 +17,7 @@ import time
 import subprocess
 import re
 import os
+import syslog
 
 def shutdown():
     print "Shutting down socket"
@@ -24,7 +25,7 @@ def shutdown():
     sys.exit(0)
 
 def log(msg):
-    print msg
+    syslog.syslog(msg)
 
 def sigHandler(signum, frame):
     print "Signal %d caught" % signum
