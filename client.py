@@ -25,8 +25,10 @@ while running:
     inputready,outputready,exceptready = select.select(input,[],[]) 
     data = loggieSocket.recv(size).rstrip()
     if data:
+        data = data.replace("\'","")
         print "data: ", data
-        cmd = "terminal-notifier -title 'Loggie' -message '%s'" % data
+        cmd = "growlnotify -t 'Loggie' -m '%s'" % data #.replace("'","\'")
+        #cmd = "terminal-notifier -title 'Loggie' -message '%s'" % data
         os.system(cmd)
     else:
         print "Socket died :-("
