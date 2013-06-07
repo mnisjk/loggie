@@ -38,7 +38,7 @@ logFile = '/var/log/syslog'
 server  = "localhost"
 port    = 5005 
 regex   = 'PHP Fatal error|PHP Parse error|PHP Warning|Error processing|assert|alrt|warn|eror' #grep on our log file
-remove  = '^.*FREAK-DAT-TONE' #remove this from the notification since space is a preimum
+remove  = '^.*FREAK-DAT-TONE' #remove this from the notification since space is a premium
 
 # Leave me alone, unless you know what you're doing!
 backlog = 5 

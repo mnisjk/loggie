@@ -1,0 +1,37 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          loggie.py
+# Short-Description: Start loggie server
+### END INIT INFO
+
+#function stoploggie {
+#    PID=`cat /tmp/loggie.pid`
+#    if [ "$PID" != "" ]; then
+#        kill -TERM $PID
+#        rm /tmp/loggie.pid
+#    fi
+#}
+
+LOGGIE="/usr/bin/loggie/server.py"
+case "$1" in
+    start)
+        echo "Starting loggie"
+        $LOGGIE start
+        ;;
+    stop)
+        echo "Stopping loggie"
+        #stoploggie
+        $LOGGIE stop
+        ;;
+    restart)
+        echo "Restarting loggie"
+        #stoploggie
+        #sleep 1
+        #$LOGGIE restart
+        ;;
+    *)
+        echo "Usage: $0  {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
